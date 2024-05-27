@@ -61,12 +61,17 @@ class CustomDataset(DatasetTemplate):
             gt_names.append(line_list[-1])
 
         return np.array(gt_boxes, dtype=np.float32), np.array(gt_names)
-
-    def get_lidar(self, idx):
-        lidar_file = self.root_path / 'points' / ('%s.npy' % idx)
-        assert lidar_file.exists()
-        point_features = np.load(lidar_file)
-        return point_features
+        
+    def get_lidar(self, sample_idx):
+        lidar_file = self.root_path / 'points' / (sample_idx + '.bin')  # Assuming your LiDAR files are .bin
+        print(f"Checking for LiDAR file at: {lidar_file}")  # Debug statement
+        assert lidar_file.exists(), f"LiDAR file not found: {lidar_file}"
+        return np.fromfile(str(lidar_file), dtype=np.float32).reshape(-1, 4)
+    # def get_lidar(self, idx):
+    #     lidar_file = self.root_path / 'points' / ('%s.npy' % idx)
+    #     assert lidar_file.exists()
+    #     point_features = np.load(lidar_file)
+    #     return point_features
 
     def set_split(self, split):
         super().__init__(
@@ -277,7 +282,7 @@ if __name__ == '__main__':
         ROOT_DIR = (Path(__file__).resolve().parent / '../../../').resolve()
         create_custom_infos(
             dataset_cfg=dataset_cfg,
-            class_names=['Vehicle', 'Pedestrian', 'Cyclist'],
+            class_names=['Car'],
             data_path=ROOT_DIR / 'data' / 'custom',
             save_path=ROOT_DIR / 'data' / 'custom',
         )
